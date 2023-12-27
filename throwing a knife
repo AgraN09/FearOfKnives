@@ -1,0 +1,37 @@
+using UnityEngine;
+
+public class KnifeThrowing : MonoBehaviour
+{
+    public float throwSpeed = 10f;
+    public float throwAngle = 45f;
+
+    private bool isThrown = false;
+    private float time = 0f;
+
+    void Update()
+    {
+        if (!isThrown)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                ThrowKnife();
+            }
+        }
+        else
+        {
+            // Update knife position based on projectile motion equations
+            float x = throwSpeed * Mathf.Cos(Mathf.Deg2Rad * throwAngle) * time;
+            float y = throwSpeed * Mathf.Sin(Mathf.Deg2Rad * throwAngle) * time - 0.5f * 9.8f * Mathf.Pow(time, 2);
+
+            transform.position = new Vector3(x, y, 0f);
+
+            // Update time for the next iteration
+            time += Time.deltaTime;
+        }
+    }
+
+    void ThrowKnife()
+    {
+        isThrown = true;
+    }
+}
