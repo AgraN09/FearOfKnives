@@ -1,0 +1,16 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+public class PlayScript : MonoBehaviour
+{
+    public GameObject MainMenu;
+    public GameObject Player;
+    public GameObject ExtraCamera;
+    // Start is called before the first frame update
+    public void PlayGame()
+    {
+        MainMenu.SetActive(false);
+        Player.SetActive(true);
+        ExtraCamera.SetActive(false);
+    }
+}
