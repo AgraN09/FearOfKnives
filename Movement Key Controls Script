@@ -1,0 +1,86 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+ 
+#if UNITY_EDITOR // only required if using the Menu Item function at the end of this script
+using UnityEditor;
+#endif
+ 
+[RequireComponent(typeof(CharacterController))]
+public class BasicFPCC : MonoBehaviour
+{
+    [Header("Layer Mask")]
+    [Tooltip("Layer Mask for sphere/raycasts. Assign the Player object to a Layer, then Ignore that layer here.")]
+    public LayerMask castingMask;                              // Layer mask for casts. You'll want to ignore the player.
+ 
+    // - Components -
+    private CharacterController controller;                    // CharacterController component
+    private Transform playerTx;                                // this player object
+ 
+    [Header("Main Camera")]
+    [Tooltip("Drag the FPC Camera here")]
+    public Transform cameraTx;                                 // Main Camera, as child of BasicFPCC object
+ 
+    [Header("Optional Player Graphic")]
+    [Tooltip("optional capsule to visualize player in scene view")]
+    public Transform playerGFX;                                // optional capsule graphic object
+   
+    [Header("Inputs")]
+    [Tooltip("Disable if sending inputs from an external script")]
+    public bool useLocalInputs = true;
+    [Space(5)]
+    public string axisLookHorzizontal = "Mouse X";             // Mouse to Look
+    public string axisLookVertical    = "Mouse Y";             //
+    public string axisMoveHorzizontal = "Horizontal";          // WASD to Move
+    public string axisMoveVertical    = "Vertical";            //
+    public KeyCode keyRun             = KeyCode.LeftShift;     // Left Shift to Run
+    public KeyCode keyCrouch          = KeyCode.LeftControl;   // Left Control to Crouch
+    public KeyCode keyJump            = KeyCode.Space;         // Space to Jump
+    public KeyCode keySlide           = KeyCode.F;             // F to Slide (only when running)
+    public KeyCode keyToggleCursor    = KeyCode.BackQuote;     // ` to toggle lock cursor (aka [~] console key)
+ 
+    // Input Variables that can be assigned externally
+    // the cursor can also be manually locked or freed by calling the public void SetLockCursor( bool doLock )
+    [HideInInspector] public float inputLookX        = 0;      //
+    [HideInInspector] public float inputLookY        = 0;      //
+    [HideInInspector] public float inputMoveX        = 0;      // range -1f to +1f
+    [HideInInspector] public float inputMoveY        = 0;      // range -1f to +1f
+    [HideInInspector] public bool inputKeyRun        = false;  // is key Held
+    [HideInInspector] public bool inputKeyCrouch     = false;  // is key Held
+    [HideInInspector] public bool inputKeyDownJump   = false;  // is key Pressed
+    [HideInInspector] public bool inputKeyDownSlide  = false;  // is key Pressed
+    [HideInInspector] public bool inputKeyDownCursor = false;  // is key Pressed
+   
+    [Header("Look Settings")]
+    public float mouseSensitivityX = 2f;             // speed factor of look X
+    public float mouseSensitivityY = 2f;             // speed factor of look Y
+    [Tooltip("larger values for less filtering, more responsiveness")]
+    public float mouseSnappiness = 20f;              // default was 10f; larger values of this cause less filtering, more responsiveness
+    public bool invertLookY = false;                 // toggle invert look Y
+    public float clampLookY = 90f;                   // maximum look up/down angle
+   
+    [Header("Move Settings")]
+    public float crouchSpeed = 3f;                   // crouching movement speed
+    public float walkSpeed = 7f;                     // regular movement speed
+    public float runSpeed = 12f;                     // run movement speed
+    public float slideSpeed = 14f;                   // slide movement speed
+    public float slideDuration = 2.2f;               // duration of slide
+    public float gravity = -9.81f;                   // gravity / fall rate
+    public float jumpHeight = 2.5f;                  // jump height
+ 
+    [Header("Grounded Settings")]
+    [Tooltip("The starting position of the isGrounded spherecast. Set to the sphereCastRadius plus the CC Skin Width. Enable showGizmos to visualize.")]
+    // this should be just above the base of the cc, in the amount of the skin width (in case the cc sinks in)
+    //public float startDistanceFromBottom = 0.2f;
+    public float groundCheckY = 0.33f;               // 0.25 + 0.08 (sphereCastRadius + CC skin width)
+    [Tooltip("The position of the ceiling checksphere. Set to the height minus sphereCastRadius plus the CC Skin Width. Enable showGizmos to visualize.")]
+    // this should extend above the cc (by approx skin width) so player can still move when not at full height (not crouching, trying to stand up),
+    // otherwise if it's below the top then the cc gets stuck
+    public float ceilingCheckY = 1.83f;              // 2.00 - 0.25 + 0.08 (height - sphereCastRadius + CC skin width)
+    [Space(5)]
+    public float sphereCastRadius = 0.25f;           // radius of area to detect for ground
+    public float sphereCastDistance = 0.75f;         // How far spherecast moves down from origin point
+    [Space(5)]
+    public float raycastLength = 0.75f;              // secondary raycasts (match to sphereCastDistance)
+    public Vector3 rayOriginOffset1 = new Vector3(-0.2f, 0f, 0.16f);
+    public Vector3 rayOriginOffset2 = new Vector3(0...
