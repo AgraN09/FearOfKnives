@@ -1,0 +1,59 @@
+using UnityEngine;
+
+public class ViewBobbing : MonoBehaviour
+{
+    public float bobbingSpeed = 0.15f;
+    public float bobbingAmount = 0.05f;
+    public float midpoint = 2.0f;
+
+    private float timer = 0.0f;
+
+    void Update()
+    {
+        if (Mathf.Abs(Input.GetAxis("Vertical")) > 0.01f || Mathf.Abs(Input.GetAxis("Horizontal")) > 0.01f)
+        {
+            // Player is moving, apply view bobbing
+            float waveslice = 0.0f;
+
+            float horizontal = Input.GetAxis("Horizontal");
+            float vertical = Input.GetAxis("Vertical");
+
+            Vector3 cSharpConversion = transform.InverseTransformDirection(Vector3.forward);
+
+            if (Mathf.Abs(horizontal) == 0 && Mathf.Abs(vertical) == 0)
+            {
+                timer = 0.0f;
+            }
+            else
+            {
+                waveslice = Mathf.Sin(timer);
+                timer = timer + bobbingSpeed;
+
+                if (timer > Mathf.PI * 2)
+                {
+                    timer = timer - (Mathf.PI * 2);
+                }
+            }
+
+            if (waveslice != 0)
+            {
+                float translateChange = waveslice * bobbingAmount;
+                float totalAxes = Mathf.Abs(horizontal) + Mathf.Abs(vertical);
+                totalAxes = Mathf.Clamp(totalAxes, 0.0f, 1.0f);
+                translateChange = totalAxes * translateChange;
+
+                Vector3 localPosition = transform.localPosition;
+                localPosition.y = midpoint + translateChange;
+                transform.localPosition = localPosition;
+            }
+            else
+            {
+                Vector3 localPosition = transform.localPosition;
+                localPosition.y = midpoint;
+                transform.localPosition = localPosition;
+            }
+        }
+        else
+        {
+            // Player is not moving, reset to midpoint
+      
