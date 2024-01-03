@@ -1,0 +1,80 @@
+using UnityEngine;
+
+public class KnifeController : MonoBehaviour
+{
+    public float throwForce = 10f;
+    public Transform handTransform;
+    public LayerMask targetLayer;
+
+    private bool isThrown = false;
+    private Rigidbody knifeRigidbody;
+
+    void Start()
+    {
+        knifeRigidbody = GetComponent<Rigidbody>();
+    }
+
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(0) && !isThrown)
+        {
+            ThrowKnife();
+        }
+
+        if (Input.GetMouseButtonDown(1) && !isThrown)
+        {
+            SwingKnife();
+        }
+    }
+
+    void ThrowKnife()
+    {
+        transform.parent = null;
+        knifeRigidbody.isKinematic = false;
+        knifeRigidbody.AddForce(Camera.main.transform.forward * throwForce, ForceMode.Impulse);
+        isThrown = true;
+    }
+
+    void SwingKnife()
+    {
+        // Perform a raycast to detect targets
+        Ray ray = new Ray(Camera.main.transform.position, Camera.main.transform.forward);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, targetLayer))
+        {
+            // Perform actions based on the hit target (you can customize this part)
+            Debug.Log("Hit: " + hit.collider.gameObject.name);
+
+            // Example: Destroy the hit object
+            Destroy(hit.collider.gameObject);
+        }
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        // Check if the thrown knife has hit a target
+        if (isThrown && other.gameObject.layer == LayerMask.NameToLayer("Target"))
+        {
+            // Perform actions based on the hit target (you can customize this part)
+            Debug.Log("Hit target: " + other.gameObject.name);
+
+            // Example: Destroy the hit target
+            Destroy(other.gameObject);
+
+            // Reset the knife
+            ResetKnife();
+        }
+    }
+
+    void ResetKnife()
+    {
+        isThrown = false;
+        knifeRigidbody.velocity = Vector3.zero;
+        knifeRigidbody.angularVelocity = Vector3.zero;
+        knifeRigidbody.isKinematic = true;
+        transform.parent = handTransform;
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
+    }
+}
